@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kochi 💖</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500&display=swap" rel="stylesheet">
+
+<style>
+body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: black;
+    font-family: 'Poppins', sans-serif;
+}
+
+.phone {
+    width: 95vw;
+    max-width: 380px;
+    height: 95vh;
+    border-radius: 30px;
+    overflow: hidden;
+    background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+    color: white;
+    position: relative;
+}
+
+/* STATUS BAR */
+.status {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 12px;
+    font-size: 12px;
+    align-items: center;
+}
+
+/* signal bars */
+.signal {
+    display: flex;
+    gap: 2px;
+}
+.bar {
+    width: 3px;
+    background: white;
+}
+.bar:nth-child(1){height:4px;}
+.bar:nth-child(2){height:6px;}
+.bar:nth-child(3){height:8px;}
+.bar:nth-child(4){height:10px;}
+
+/* wifi */
+.wifi {
+    font-size: 12px;
+}
+
+/* battery */
+.battery {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.battery-box {
+    width: 22px;
+    height: 10px;
+    border: 1px solid white;
+    position: relative;
+}
+.battery-level {
+    height: 100%;
+    background: lime;
+    width: 80%;
+}
+.battery-tip {
+    width: 2px;
+    height: 6px;
+    background: white;
+}
+
+/* time */
+.time {
+    text-align: center;
+    font-size: 3rem;
+    margin-top: 10px;
+}
+
+/* notification */
+.notification {
+    margin: 20px;
+    padding: 15px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 15px;
+}
+
+.swipe {
+    position: absolute;
+    bottom: 20px;
+    width: 100%;
+    text-align: center;
+    opacity: 0.6;
+}
+
+/* PIN */
+.pin {
+    display: none;
+    text-align: center;
+    padding-top: 100px;
+}
+
+.dots {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin: 20px;
+}
+
+.dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+}
+.filled { background: white; }
+
+/* keypad */
+.keypad {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 18px;
+    padding: 20px 40px;
+}
+
+.key {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.erase {
+    background: rgba(255,80,80,0.3);
+}
+
+/* reveal */
+.reveal {
+    display: none;
+    text-align: center;
+    padding-top: 140px;
+}
+
+.countdown { color: #ffd369; }
+</style>
+</head>
+
+<body>
+
+<div class="phone">
+
+<!-- STATUS -->
+<div class="status">
+    <div style="display:flex;gap:5px;align-items:center;">
+        <div class="signal">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+        </div>
+        <span class="wifi">📡</span>
+    </div>
+
+    <div id="day"></div>
+
+    <div class="battery">
+        <div class="battery-box">
+            <div class="battery-level" id="batteryLevel"></div>
+        </div>
+        <div class="battery-tip"></div>
+        <span id="batteryText">80%</span>
+    </div>
+</div>
+
+<!-- LOCK -->
+<div id="lock">
+    <div class="time" id="time"></div>
+
+    <div class="notification">
+        💬 Kochi 💖<br>
+        <small>I made something for you ✨</small>
+    </div>
+
+    <div class="swipe">⬆️ swipe up</div>
+</div>
+
+<!-- PIN -->
+<div class="pin" id="pin">
+    <div>Enter Passcode</div>
+
+    <div class="dots">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+    </div>
+
+    <div class="keypad">
+        <div class="key" onclick="press(1)">1</div>
+        <div class="key" onclick="press(2)">2</div>
+        <div class="key" onclick="press(3)">3</div>
+        <div class="key" onclick="press(4)">4</div>
+        <div class="key" onclick="press(5)">5</div>
+        <div class="key" onclick="press(6)">6</div>
+        <div class="key" onclick="press(7)">7</div>
+        <div class="key" onclick="press(8)">8</div>
+        <div class="key" onclick="press(9)">9</div>
+        <div></div>
+        <div class="key" onclick="press(0)">0</div>
+        <div class="key erase" onclick="erase()">⌫</div>
+    </div>
+</div>
+
+<!-- REVEAL -->
+<div class="reveal" id="reveal">
+    <div id="text">✨ Opening...</div>
+    <div class="countdown" id="countdown"></div>
+</div>
+
+</div>
+
+<script>
+// TIME + DAY
+setInterval(()=>{
+    const now=new Date();
+
+    let h=now.getHours();
+    let m=String(now.getMinutes()).padStart(2,'0');
+    let ampm=h>=12?"PM":"AM";
+    h=h%12||12;
+
+    document.getElementById("time").innerText=h+":"+m+" "+ampm;
+
+    document.getElementById("day").innerText=
+        now.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+},1000);
+
+// BATTERY DYNAMIC
+let battery=80;
+setInterval(()=>{
+    battery = Math.max(10, battery - Math.random()*2);
+    document.getElementById("batteryText").innerText=Math.floor(battery)+"%";
+    document.getElementById("batteryLevel").style.width=battery+"%";
+},5000);
+
+// SWIPE
+let startY=0;
+document.addEventListener("touchstart",e=>startY=e.touches[0].clientY);
+document.addEventListener("touchend",e=>{
+    if(startY - e.changedTouches[0].clientY > 80){
+        lock.style.display="none";
+        pin.style.display="block";
+    }
+});
+
+// PIN
+let input="";
+const correct="1504";
+
+function press(n){
+    if(input.length<4){
+        input+=n;
+        updateDots();
+    }
+
+    if(input.length===4){
+        setTimeout(()=>{
+            if(input===correct){
+                openReveal();
+            }else{
+                input="";
+                updateDots();
+            }
+        },200);
+    }
+}
+
+function erase(){
+    input=input.slice(0,-1);
+    updateDots();
+}
+
+function updateDots(){
+    document.querySelectorAll(".dot").forEach((d,i)=>{
+        d.classList.toggle("filled", i<input.length);
+    });
+}
+
+// REVEAL
+function openReveal(){
+    pin.style.display="none";
+    reveal.style.display="block";
+
+    const story=[
+        "💖 Kochi...",
+        "✨ You unlocked something special...",
+        "🎂 Your birthday is coming..."
+    ];
+
+    let i=0;
+    const interval=setInterval(()=>{
+        if(i<story.length){
+            text.innerText=story[i++];
+        }else{
+            clearInterval(interval);
+            startCountdown();
+        }
+    },2000);
+}
+
+// COUNTDOWN
+function startCountdown(){
+    const birthday=new Date("April 15, 2026 00:00:00").getTime();
+
+    setInterval(()=>{
+        const now=new Date().getTime();
+        const gap=birthday-now;
+
+        const d=Math.floor(gap/(1000*60*60*24));
+        const h=Math.floor((gap/(1000*60*60))%24);
+        const m=Math.floor((gap/(1000*60))%60);
+        const s=Math.floor((gap/1000)%60);
+
+        countdown.innerText=d+"d "+h+"h "+m+"m "+s+"s";
+    },1000);
+}
+</script>
+
+</body>
+</html>
